@@ -7,6 +7,8 @@ import com.eazybanks.entity.Customer;
 import com.eazybanks.repository.AccountsRepository;
 import com.eazybanks.repository.CustomerRepository;
 import com.eazybanks.service.impl.AccountsServiceImpl;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.mockito.InjectMocks;
@@ -20,55 +22,64 @@ import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
-public class AccountsServiceImplTest {
+class AccountsServiceImplTest {
 
     @InjectMocks
     AccountsServiceImpl accountsServiceImpl;
 
-     @Mock
+    @Mock
     AccountsRepository accountsRepository;
 
     @Mock
     CustomerRepository customerRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    ModelMapper modelMapper;
+
+    private String mobileNumber;
+    private Customer customer;
+    private Accounts accounts;
+    private CustomerDto customerDto;
+    private AccountsDto accountsDto;
+
+    @BeforeEach
+    void setUp() {
+        mobileNumber = "7983706916";
+        customer = createCustomerStub();
+        accounts = createAccountsStub();
+        customerDto = new CustomerDto();
+        accountsDto = new AccountsDto();
+    }
 
     @Test
-    public void fetchAccountTest(){
-
-        String mobileNumber = "7983706916";
-
-        Customer customer = createCustomerStub();
-        Accounts accounts = createAccountsStub();
-
-        CustomerDto customerDto = new CustomerDto();
-        AccountsDto accountsDto = new AccountsDto();
-
-        // repository mocks
+    void fetchAccountTest() {
         when(customerRepository.findByMobileNumber(mobileNumber))
                 .thenReturn(Optional.of(customer));
 
         when(accountsRepository.findByCustomerId(customer.getCustomerId()))
                 .thenReturn(Optional.of(accounts));
 
-      // mapper mocks
         when(modelMapper.map(customer, CustomerDto.class))
                 .thenReturn(customerDto);
 
         when(modelMapper.map(accounts, AccountsDto.class))
                 .thenReturn(accountsDto);
 
-       // call method
         CustomerDto result = accountsServiceImpl.fetchAccount(mobileNumber);
         assertEquals(customerDto, result);
     }
 
+    @AfterEach
+    void tearDown() {
+        System.out.println("Test finished");
+    }
+
+    // stub methods
     private Customer createCustomerStub() {
         return Customer.builder()
-                .customerId(1L)              // Java field name
-                .name("decode")              // Java field name
-                .mobileNumber("9999999999")  // Java field name
+                .customerId(1L)
+                .name("decode")
+                .mobileNumber("9999999999")
                 .email("test@gmail.com")
                 .build();
     }
@@ -81,4 +92,4 @@ public class AccountsServiceImplTest {
                 .branchAddress("Delhi")
                 .build();
     }
-    }
+}
